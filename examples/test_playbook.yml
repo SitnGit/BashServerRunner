@@ -1,0 +1,28 @@
+---
+- hosts: local
+  tasks:
+    - name: Test uptime
+      bash: uptime
+
+    - name: Test whoami
+      bash: whoami
+
+    - name: Test date
+      bash: date
+
+    - name: Test hostname
+      bash: hostname
+
+    - name: Test current directory
+      bash: pwd
+
+- hosts: testgroup
+  tasks:
+    - name: Test whoami
+      bash: whoami
+
+    - name: Test date
+      bash: date
+
+    - name: Test current directory
+      bash: pwd
