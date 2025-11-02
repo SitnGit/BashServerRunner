@@ -1,0 +1,19 @@
+---
+- hosts: dbservers
+  tasks:
+    - name: Server uptime
+      bash: uptime
+
+    - name: Server disk usage
+      bash: df -h
+
+    - name: Memory usage
+      bash: free -h
+
+- hosts: webservers
+  tasks:
+    - name: Check nginx status
+      bash: systemctl status nginx
+
+    - name: Current connections
+      bash: ss -tuln | grep LISTEN
