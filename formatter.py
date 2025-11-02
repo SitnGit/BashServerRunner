@@ -20,6 +20,9 @@ class Formatter:
 
         lines.append(f"Exit Code: {result['exit_code']}")
 
+        duration = result.get('duration', 0.0)
+        lines.append(f"Duration: {duration:.3f}s")
+
         lines.append("")  # Blank line between results
 
         return '\n'.join(lines)

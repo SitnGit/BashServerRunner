@@ -1,7 +1,9 @@
 import argparse
 import sys
+from parsers import parse_hosts,parse_playbook
 from pathlib import Path
-
+from runner import TaskRunner
+from formatter import Formatter
 
 def main():
     parser = argparse.ArgumentParser(
@@ -39,3 +41,35 @@ def main():
     if not Path(args.playbook).exists():
         print(f"Error: Playbook file not found: {args.playbook}", file=sys.stderr)
         sys.exit(1)
+
+    try:
+        hosts_data = parse_hosts(args.hosts)
+
+        if not hosts_data:
+            print("Error: No host groups found in hosts file", file=sys.stderr)
+            sys.exit(1)
+
+        playbook_data = parse_playbook(args.playbook)
+
+        runner = TaskRunner(max_workers=args.workers)
+        results = runner.run_playbook(playbook_data, hosts_data)
+
+        formatter = Formatter()
+        formatter.print_results(results)
+    except FileNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\n\nInterrupted by user", file=sys.stderr)
+        sys.exit(130)
+    except Exception as e:
+        print(f"Unexpected error: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+
+if __name__ == '__main__':
+      main()

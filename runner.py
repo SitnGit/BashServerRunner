@@ -1,6 +1,7 @@
 from typing import Dict, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from executor import SSHExecutor
+import time
 
 class TaskRunner:
     def __init__(self, max_workers: int = 10):
@@ -91,8 +92,11 @@ class TaskRunner:
             'stdout': '',
             'stderr': '',
             'exit_code': -1,
-            'error': None
+            'error': None,
+            'duration': 0.0
         }
+
+        start_time = time.time()
 
         try:
             with SSHExecutor(hostname) as executor:
@@ -106,5 +110,8 @@ class TaskRunner:
         except Exception as e:
             result['error'] = str(e)
             result['stderr'] = f"Connection/execution error: {e}"
+
+        end_time = time.time()
+        result['duration'] = end_time - start_time
 
         return result
