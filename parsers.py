@@ -30,7 +30,12 @@ def parse_hosts(hosts_path: str = "/etc/playbook/hosts") -> Dict[str, List[str]]
                     f"at line {line_num}"
                 )
 
+    for group_name, hosts in groups.items():
+      if not hosts:
+          print(f"Warning: Host group '{group_name}' is empty")
+
     return groups
+    
 
 def parse_playbook(playbook_path: str) -> List[Dict]:
     playbook_file = Path(playbook_path)
