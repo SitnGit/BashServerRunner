@@ -2,6 +2,7 @@ import os
 import paramiko
 from typing import Dict, Optional
 from pathlib import Path
+import time
 
 class SSHExecutor:
     """Execute bash commands on remote servers via SSH."""
@@ -13,34 +14,29 @@ class SSHExecutor:
         self.timeout = timeout
         self.client = None
 
-    def connect(self) -> None:
-        """
-        Establish SSH connection using key-based authentication.
-        """
-        self.client = paramiko.SSHClient()
+    def connect(self, max_retries: int = 3) -> None:
+        """Establish SSH connection with retry logic."""
+        for attempt in range(max_retries):
+            try:
+                self.client = paramiko.SSHClient()
+                self.client.load_system_host_keys()
+                self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-        # Load system host keys and auto-add unknown hosts
-        self.client.load_system_host_keys()
-        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        # auto adds host to known host, COULD BE AN ATTACKER
+                self.client.connect(
+                    hostname=self.hostname,
+                    username=self.username,
+                    timeout=self.timeout,
+                    look_for_keys=True,
+                    allow_agent=True
+                )
+                return  # Success!
 
-        # Look for SSH keys in standard locations
-        ssh_dir = Path.home() / '.ssh'
-        key_files = ['id_rsa', 'id_ed25519', 'id_ecdsa', 'id_dsa']
-
-        # Try connecting with available keys
-        try:
-            self.client.connect(
-                hostname=self.hostname,
-                username=self.username,
-                timeout=self.timeout,
-                look_for_keys=True,
-                allow_agent=True
-            )
-        except Exception as e:
-            raise ConnectionError(
-                f"Failed to connect to {self.hostname}: {e}"
-            )
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    raise ConnectionError(
+                        f"Failed to connect to {self.hostname} after {max_retries} attempts: {e}"
+                    )
+                time.sleep(1)  # Wait before retry
 
     def execute(self, command: str) -> Dict[str, any]:
         """
