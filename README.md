@@ -20,10 +20,10 @@ public keys of the client user is in the authorized_keys file in the server
 pip install -r requirements.txt
 
 # Run a playbook
-python -m main playbook.yml --hosts hosts
+python main.py examples/test_playbook.yml --hosts examples/test_hosts
 
 # Example with options
-python -m main playbook.yml --workers 20 --no-color
+python main.py examples/test_playbook.yml --hosts examples/test_hosts --workers 20 --no-color
 
 ```
 
@@ -34,6 +34,12 @@ Built with clean separation of concerns:
 - Executor - Handle SSH connections and command execution
 - Runner - Orchestrate parallel task execution across servers
 - Formatter - Display results in readable format
+
+## Testing
+Since testing can only be done locally(for now), there are two files used for local testing,
+thats:
+- examples/test_hosts - which has host groups with localhost and 127.0.0.1 to simulate different servers
+- examples/test_playbook.yml - which has two plays with tasks
 
 ## Requirements
 
